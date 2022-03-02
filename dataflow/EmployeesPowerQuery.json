@@ -1,0 +1,20 @@
+{
+	"name": "EmployeesPowerQuery",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "employees",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~>  employees",
+					"dataset": {
+						"referenceName": "employees",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"script": "section Section1;\r\nshared employees = let\r\n  AdfDoc = AzureStorage.DataLakeContents(\"https://rawblobstorage.dfs.core.windows.net/dtcc/rawdata/employees.csv\"),\r\n  Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]),\r\n  PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true])\r\nin\r\n  PromotedHeaders;\r\nshared UserQuery = let\r\n  Source = employees,\r\n  #\"Filtered rows\" = Table.SelectRows(Source, each ([Quarter of Joining] = \"Q2\" or [Quarter of Joining] = \"Q4\"))\r\nin\r\n  #\"Filtered rows\";\r\n",
+			"documentLocale": "en-us"
+		}
+	}
+}
